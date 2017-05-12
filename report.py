@@ -30,8 +30,8 @@ class Report(object):
 
     def __init__(self):
         """
-        Defines variables to share across methods, sets up cli, logging, and
-        runs generate method.
+        Defines variables to share across methods, sets up cli, logging,
+        Shotgun connections and runs self._generate method.
         """
 
         # Initialize shared variables.
@@ -143,8 +143,8 @@ class Report(object):
 
     def _generate(self):
         """
-        Loops through self._sites, mutates it with user information, and writes
-        out a report.json file.
+        Loops through self._sites, mutates it with HumanUser information, and
+        writes out a report.json file.
         """
 
         # Init our multi-site variables.
@@ -155,7 +155,7 @@ class Report(object):
         # Loop through each Site and generate a report.
         for k, v in self._sites.iteritems():
 
-            # Add our Site url for the multi-site report.
+            # Add our Site url to the multi-site report.
             sites.add(k)
 
             # Get user info for the Site, ignoring Shotgun Support, and add
@@ -182,12 +182,11 @@ class Report(object):
             v["active_users"] = active_users
             v["num_active_users"] = len(active_users)
 
-            # Add active user email addresses to the multi-site set, ignoring
-            # Shotgun Support.
+            # Add active user email addresses to the multi-site set.
             for user in active_users:
                 multi_site_active_users.add(user["email"])
 
-            # If no date range was given, use the past month.
+            # If no date range was given, use the last month.
             date_filter = ["created_at", "in_last", 1, "MONTH"]
             date_range = "1 month"
             if self._args["start_date"]:
@@ -201,7 +200,8 @@ class Report(object):
                 ]
                 date_range = "%s -> %s" % (self._args["start_date"], self._args["end_date"])
 
-            # Get all the user login records for date range, ignoring Shotgun Support
+            # Get all the user login records for the date range, ignoring
+            # Shotgun Support
             logging.info("Getting users who logged into %s (date range is %s)..." % (k, date_range))
             users_by_date = v["sg"].find(
                 "EventLogEntry",
@@ -222,7 +222,7 @@ class Report(object):
                 ],
             )
 
-            # The Shotgun handle isn't json-friendly, so lets nix that now that
+            # The Shotgun handle isn't json-friendly, so lets nix that, now that
             # we're done with it.
             v.pop("sg", None)
 
@@ -236,7 +236,7 @@ class Report(object):
             v["logged_in_users"] = list(logged_in_users)
             v["num_logged_in_users"] = len(v["logged_in_users"])
 
-        # Add the multi-site report.
+        # Add the multi-site report to self._sites.
         self._sites["multi_site"] = {
             "sites": list(sites),
             "date_range": date_range,
@@ -250,7 +250,7 @@ class Report(object):
         to_write = self._sites["multi_site"]
         if self._args["verbose"]:
             to_write = self._sites
-        logging.info("Generating report.json file...")
+        logging.info("Writing report.json file...")
         with open("report.json", "w") as fh:
             json.dump(to_write, fh, indent=4, sort_keys=True)
         logging.info("Done! Email report.json file to Shotgun Support.")
