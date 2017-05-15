@@ -41,14 +41,13 @@ class Report(object):
 
         :param bool generate: Whether to generate a report.json file or not.
         :param string start_date: The date to start searching for HumanUser
-                                  login attempts. Format example: 2017-05-01.
+                                  logins. Format example: 2017-05-01.
         :param string end_date: The date to end searching for HumanUser login
-                                attempts. Defaults to today. Format example:
-                                2017-05-01.
+                                Defaults to today. Format example: 2017-05-01.
         :param bool in_house: Whether or not to include additional HumanUser
                               data in the report.
         :param bool display: This option can be used to quickly print a report
-                             to terminal after the report.json file has been
+                             to the terminal after the report.json file has been
                              generated.
         """
 
