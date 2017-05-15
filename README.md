@@ -63,7 +63,7 @@ This report can be copy/pasted and sent to Shotgun Support. Additionally, a
 `report.json` file will be created in *this* directory. The file can also be
 emailed to Shotgun Support, but note that the `report.json` file contains
 detailed information about Shotgun HumanUsers, so—for security reasons—it may be
-preferable to send the shell output only.
+preferable to only send the shell output.
 
 By default the script will parse EventLogEntries for the last 30 days. You can
 optionally specify a date range with the `start_date` and `end_date` arguments,
@@ -71,6 +71,10 @@ for example:
 
 `./report.py --generate --start_date 2017-04-20 --end_date 2017-05-12`
 
-For more detailed per-site and user usage info, add the `--in_house` flag:
+You can display pre-generated reports with the `--display` flag:
 
-`./report.py --generate --in_house`
+`./report.py --display`
+
+For more detailed user usage info, add the `--in_house` flag:
+
+`./report.py --display --in_house`

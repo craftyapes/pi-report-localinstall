@@ -13,6 +13,7 @@ run `./report.py -h` or `./report.py --help` for usage information.
 """
 
 import os
+import re
 import sys
 import yaml
 import json
@@ -33,10 +34,22 @@ class Report(object):
     reports.
     """
 
-    def __init__(self, generate, start_date, end_date, in_house, print_):
+    def __init__(self, generate, start_date, end_date, in_house, display):
         """
         Defines variables to share across methods, sets up logging, Shotgun
         connections, and runs _generate and _export class methods.
+
+        :param bool generate: Whether to generate a report.json file or not.
+        :param string start_date: The date to start searching for HumanUser
+                                  login attempts. Format example: 2017-05-01.
+        :param string end_date: The date to end searching for HumanUser login
+                                attempts. Defaults to today. Format example:
+                                2017-05-01.
+        :param bool in_house: Whether or not to include additional HumanUser
+                              data in the report.
+        :param bool display: This option can be used to quickly print a report
+                             to terminal after the report.json file has been
+                             generated.
         """
 
         # Initialize shared variables. By default, use the last month for the
@@ -50,8 +63,10 @@ class Report(object):
         self._set_up_logging()
 
         # Bail if we have an invalid set of args.
-        if in_house and (not generate or not start_date or not print_):
-            logging.info("No generate, start_date, or print_ args specified, exiting...")
+        if in_house and (not generate and not start_date and not display):
+            logging.info(
+                "No generate, start_date, or display args specified, exiting."
+            )
             return
 
         # Be generous and run the generate code if we've only got date args.
@@ -73,7 +88,7 @@ class Report(object):
                 logging.error("Settings dict is empty (bad \"settings.yml\" file?), exiting.")
                 return
 
-            # Deal with weird combinations of date settings.
+            # Deal with weird formatting or combinations of date settings.
             if end_date and not start_date:
                 logging.error(
                     "End date specified but no start date (would pull too many EventLogEntries), exiting."
@@ -82,6 +97,15 @@ class Report(object):
             if start_date and not end_date:
                 end_date = datetime.datetime.now().strftime("%Y-%m-%d")
                 logging.warning("No end date specified, using today (%s)." % end_date)
+            date_regex = "^\d{4}-\d{2}-\d{2}$"
+            if start_date:
+                if not re.search(date_regex, start_date):
+                    logging.error("start_date format does not match YYYY-MM-DD, exiting.")
+                    return
+            if end_date:
+                if not re.search(date_regex, end_date):
+                    logging.error("end_date format does not match YYYY-MM-DD, exiting.")
+                    return
 
             # If we've got a start/end dates, reset the date filter and date range
             # variables.
@@ -102,7 +126,7 @@ class Report(object):
 
                 if not credentials.get("script_name") or not credentials.get("script_key"):
                     logging.error(
-                        "Bad or missing settings for %s in settings.yml, exiting..." % site_url
+                        "Bad or missing settings for %s in settings.yml, exiting." % site_url
                     )
                     return
 
@@ -120,16 +144,16 @@ class Report(object):
             # Generate, export, and print the report.
             self._generate()
             self._export()
-            self._print()
+            self._display()
 
         # Print the report if it has already been generated.
-        if print_ and not generate:
+        if display and not generate:
 
             try:
                 # Read in the matched Versions data.
                 with open("report.json") as fh:
                     self._sites = json.load(fh)
-                self._print()
+                self._display()
 
             except Exception, e:
                 logging.error("Can't parse report.json: %s" % e)
@@ -260,10 +284,10 @@ class Report(object):
         with open("report.json", "w") as fh:
             json.dump(self._sites, fh, indent=4, sort_keys=True)
 
-    def _print(self):
+    def _display(self):
         """
-        Prints different versions of the Sites report, with additional info if
-        the in_house argument was used.
+        Prints different versions of the Sites report to the terminal and the
+        log, with additional info if the in_house argument was used.
         """
 
         multi_site = self._sites["multi_site"]
@@ -272,7 +296,7 @@ class Report(object):
         logging.info("Number of active users: %s" % multi_site["num_active_users"])
         logging.info("Number of logged-in users: %s" % multi_site["num_logged_in_users"])
         logging.info("Date range: %s\n" % multi_site["date_range"])
-        logging.info("Shotgun Sites: %s\n" % ", ".join(multi_site["sites"]))
+        logging.info("Shotgun Sites:\n%s\n" % "\n".join(multi_site["sites"]))
 
         if self._in_house:
             logging.info("Active users: %s\n" % ", ".join(multi_site["active_users"]))
@@ -310,16 +334,16 @@ if __name__ == "__main__":
         required=False,
     )
     parser.add_argument(
-        "-i",
-        "--in_house",
-        help="Create a more detailed report.",
+        "-d",
+        "--display",
+        help="Display the report, assuming a report.json file is present.",
         action="store_true",
         required=False,
     )
     parser.add_argument(
-        "-p",
-        "--print",
-        help="Print a report, assuming a report.json file is present.",
+        "-i",
+        "--in_house",
+        help="Display a more detailed report for in-house purposes.",
         action="store_true",
         required=False,
     )
@@ -336,5 +360,5 @@ if __name__ == "__main__":
             args["start_date"],
             args["end_date"],
             args["in_house"],
-            args["print"]
+            args["display"]
         )
