@@ -49,7 +49,10 @@ class Report(object):
         # Set up everything we need to log output.
         self._set_up_logging()
 
-        if generate:
+        if in_house and (not generate or not start_date or not print_):
+            logging.info("No generate, start_date, or print_ args specified, exiting...")
+
+        if generate or start_date or end_date:
 
             # Grab our user settings and barf if something is wrong.
             logging.info("Reading settings.yml...")
@@ -256,19 +259,21 @@ class Report(object):
 
     def _print(self):
         """
-        Prints different versions of the Sites report, depending on the
-        verbosity settings.
+        Prints different versions of the Sites report, with additional info if
+        the in_house argument was used.
         """
 
+        multi_site = self._sites["multi_site"]
+
         logging.info("\nSHOTGUN USAGE REPORT:\n")
-        logging.info("Number of active users: %s" % self._sites["multi_site"]["num_active_users"])
-        logging.info("Number of logged-in users: %s" % self._sites["multi_site"]["num_logged_in_users"])
-        logging.info("Date range: %s\n" % self._sites["multi_site"]["date_range"])
-        logging.info("Shotgun Sites: %s\n" % ", ".join(self._sites["multi_site"]["sites"]))
+        logging.info("Number of active users: %s" % multi_site["num_active_users"])
+        logging.info("Number of logged-in users: %s" % multi_site["num_logged_in_users"])
+        logging.info("Date range: %s\n" % multi_site["date_range"])
+        logging.info("Shotgun Sites: %s\n" % ", ".join(multi_site["sites"]))
 
         if self._in_house:
-            logging.info("Active users: %s\n" % ", ".join(self._sites["multi_site"]["active_users"]))
-            logging.info("Logged-in users: %s\n" % ", ".join(self._sites["multi_site"]["logged_in_users"]))
+            logging.info("Active users: %s\n" % ", ".join(multi_site["active_users"]))
+            logging.info("Logged-in users: %s\n" % ", ".join(multi_site["logged_in_users"]))
 
 
 if __name__ == "__main__":
