@@ -49,9 +49,12 @@ class Report(object):
         # Set up everything we need to log output.
         self._set_up_logging()
 
+        # Bail if we have an invalid set of args.
         if in_house and (not generate or not start_date or not print_):
             logging.info("No generate, start_date, or print_ args specified, exiting...")
+            return
 
+        # Be generous and run the generate code if we've only got date args.
         if generate or start_date or end_date:
 
             # Grab our user settings and barf if something is wrong.
