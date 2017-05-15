@@ -1,8 +1,8 @@
 # pi-report-localinstall
 
 This repo contains a command-line tool for reporting Shotgun Site usage info for
-a single or multiple Sites. It identifies users by their email addresses, and
-assumes one Shotgun account per email address.
+a single Site or multiple Sites. It identifies users by their email addresses,
+and assumes one Shotgun account per email address.
 
 ## Requirements
 
@@ -37,7 +37,7 @@ https://example2.shotgunstudio.com:
 
 ## Usage
 
-Type `report.py -h` or `report --help` for usage details.
+Type `report.py -h` or `report.py --help` for usage details.
 
 ## Workflow
 
@@ -47,16 +47,30 @@ This can be done with a single command:
 
 `./report.py --generate`
 
-After the script has finished running, a `report.json` file will be created in
-*this* directory. The report can be emailed to Shotgun Support.
+Output should appear in your shell, similar to this:
+
+```
+SHOTGUN USAGE REPORT:
+
+Number of active users: 34
+Number of logged-in users: 21
+Date range: 1 month
+
+Shotgun Sites: https://example1.shotgunstudio.com, https://example2.shotgunstudio.com
+```
+
+This report can be copy/pasted and sent to Shotgun Support. Additionally, a
+`report.json` file will be created in *this* directory. The file can also be
+emailed to Shotgun Support, but note that the `report.json` file contains
+detailed information about Shotgun HumanUsers, so—for security reasons—it may be
+preferable to send the shell output only.
 
 By default the script will parse EventLogEntries for the last 30 days. You can
 optionally specify a date range with the `start_date` and `end_date` arguments,
 for example:
 
-`./report.py --generate -start_date 2017-04-20 -end_date 2017-05-12`
+`./report.py --generate --start_date 2017-04-20 --end_date 2017-05-12`
 
-If you want more detailed per-site and user usage info, add the `--verbose`
-flag:
+For more detailed per-site and user usage info, add the `--in_house` flag:
 
-`./report.py --generate --verbose`
+`./report.py --generate --in_house`
