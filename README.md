@@ -56,7 +56,9 @@ Number of active users: 34
 Number of logged-in users: 21
 Date range: 1 month
 
-Shotgun Sites: https://example1.shotgunstudio.com, https://example2.shotgunstudio.com
+Shotgun Sites:
+https://example1.shotgunstudio.com
+https://example2.shotgunstudio.com
 ```
 
 This report can be copy/pasted and sent to Shotgun Support. Additionally, a
