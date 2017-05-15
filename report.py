@@ -54,6 +54,7 @@ class Report(object):
         # Initialize shared variables. By default, use the last month for the
         # date range.
         self._sites = {}
+        self._sg_by_site = {}
         self._date_filter = ["created_at", "in_last", 1, "MONTH"]
         self._date_range = "1 month"
         self._in_house = in_house
@@ -73,10 +74,11 @@ class Report(object):
 
             # Grab our user settings and barf if something is wrong.
             logging.info("Reading settings.yml...")
+            site_settings = {}
             if os.path.exists("settings.yml"):
                 try:
                     with open("settings.yml", "r") as fh:
-                        self._sites = yaml.load(fh)
+                        site_settings = yaml.load(fh)
                 except Exception, e:
                     logging.info("Could not parse settings.yml: %s" % e)
                     return
@@ -121,7 +123,7 @@ class Report(object):
 
             # Grab a Python API handle for each Shotgun Site and add it to the
             # self._sites dict.
-            for site_url, credentials in self._sites.iteritems():
+            for site_url, credentials in site_settings.iteritems():
 
                 if not credentials.get("script_name") or not credentials.get("script_key"):
                     logging.error(
@@ -130,15 +132,11 @@ class Report(object):
                     return
 
                 logging.info("Connecting to %s..." % site_url)
-                credentials["sg"] = shotgun_api3.Shotgun(
+                self._sg_by_site[site_url] = shotgun_api3.Shotgun(
                     site_url,
                     script_name=credentials["script_name"],
                     api_key=credentials["script_key"],
                 )
-
-                # We don't need these anymore, so lets clear them out of memory for security.
-                credentials.pop("script_name", None)
-                credentials.pop("script_key", None)
 
             # Generate, export, and print the report.
             self._generate()
@@ -190,20 +188,22 @@ class Report(object):
         """
 
         # Init our multi-site variables.
-        sites = set()
         multi_site_active_users = set()
         multi_site_logged_in_users = set()
 
         # Loop through each Site and generate a report.
-        for site_url, site_info in self._sites.iteritems():
+        for site_url, sg in self._sg_by_site.iteritems():
 
-            # Add our Site url to the multi-site report.
-            sites.add(site_url)
+            # Check if this site url has already been processed.
+            # If so, skip it to save time and processing power.
+            if site_url in self._sites:
+                continue
 
             # Get user info for the Site, ignoring Shotgun Support, and add
             # it to self._sites.
             logging.info("Getting active users on %s..." % site_url)
-            active_users = site_info["sg"].find(
+            site_info = {}
+            active_users = sg.find(
                 "HumanUser",
                 [
                     ["sg_status_list", "is", "act"],
@@ -236,7 +236,7 @@ class Report(object):
                     self._date_range
                 )
             )
-            users_by_date = site_info["sg"].find(
+            users_by_date = sg.find(
                 "EventLogEntry",
                 [
                     ["event_type", "is", "Shotgun_User_Login"],
@@ -248,10 +248,6 @@ class Report(object):
                 ],
             )
 
-            # The Shotgun handle isn't json-friendly, so lets nix that, now that
-            # we're done with it.
-            site_info.pop("sg", None)
-
             # Create a set to capture unique users.
             logged_in_users = set()
             for user in users_by_date:
@@ -262,9 +258,13 @@ class Report(object):
             site_info["logged_in_users"] = list(logged_in_users)
             site_info["num_logged_in_users"] = len(site_info["logged_in_users"])
 
+            # Register the report data for this site
+            self._sites[site_url] = site_info
+
         # Add the multi-site report to self._sites.
+        all_sites = self._sites.keys()
         self._sites["multi_site"] = {
-            "sites": list(sites),
+            "sites": all_sites,
             "date_range": self._date_range,
             "active_users": list(multi_site_active_users),
             "logged_in_users": list(multi_site_logged_in_users),
