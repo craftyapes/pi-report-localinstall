@@ -52,9 +52,9 @@ Output should appear in your shell, similar to this:
 ```
 SHOTGUN USAGE REPORT:
 
-Number of active users: 34
-Number of logged-in users: 21
-Date range: 1 month
+Number of unique user accounts that logged in between 2017-04-16 and 2017-05-16: 3
+
+Total number of user accounts with Status currently "Active": 4
 
 Shotgun Sites:
 https://example1.shotgunstudio.com
