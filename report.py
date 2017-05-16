@@ -54,7 +54,7 @@ class Report(object):
         # Initialize shared variables. By default, use the last month for the
         # date range.
         self._sites = {}
-        self._sg_by_site = {}
+        self._site_sg_connections = {}
         self._date_filter = ["created_at", "in_last", 1, "MONTH"]
         self._date_range = "1 month"
         self._in_house = in_house
@@ -132,7 +132,7 @@ class Report(object):
                     return
 
                 logging.info("Connecting to %s..." % site_url)
-                self._sg_by_site[site_url] = shotgun_api3.Shotgun(
+                self._site_sg_connections[site_url] = shotgun_api3.Shotgun(
                     site_url,
                     script_name=credentials["script_name"],
                     api_key=credentials["script_key"],
@@ -194,7 +194,7 @@ class Report(object):
         multi_site_logged_in_users = set()
 
         # Loop through each Site and generate a report.
-        for site_url, sg in self._sg_by_site.iteritems():
+        for site_url, sg in self._site_sg_connections.iteritems():
 
             # Check if this site url has already been processed.
             # If so, skip it to save time and processing power.
