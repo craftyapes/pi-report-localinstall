@@ -85,7 +85,7 @@ class Report(object):
             else:
                 logging.error("Did not find settings.yml. See README.md for details.")
                 return
-            if not self._sites:
+            if not site_settings:
                 logging.error("Settings dict is empty (bad \"settings.yml\" file?), exiting.")
                 return
 
@@ -137,6 +137,8 @@ class Report(object):
                     script_name=credentials["script_name"],
                     api_key=credentials["script_key"],
                 )
+            # Delete the site_settings variable to clear them out of memory for security
+            del site_settings
 
             # Generate, export, and print the report.
             self._generate()
