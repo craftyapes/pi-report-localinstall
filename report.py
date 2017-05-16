@@ -105,6 +105,10 @@ class Report(object):
                 if not re.search(date_regex, end_date):
                     logging.error("end_date format does not match YYYY-MM-DD, exiting.")
                     return
+            if not start_date and not end_date:
+                today = datetime.datetime.now()
+                end_date = today.strftime("%Y-%m-%d")
+                start_date = (today - datetime.timedelta(days=30)).strftime("%Y-%m-%d")
 
             # If we've got a start/end dates, reset the date filter and date range
             # variables.
@@ -117,7 +121,7 @@ class Report(object):
                         "%s%s" % (end_date, "T00:00:00Z"),
                     ],
                 ]
-                self._date_range = "%s -> %s" % (start_date, end_date)
+                self._date_range = "%s and %s" % (start_date, end_date)
 
             # Grab a Python API handle for each Shotgun Site and add it to the
             # self._sites dict.
@@ -207,7 +211,8 @@ class Report(object):
                 "HumanUser",
                 [
                     ["sg_status_list", "is", "act"],
-                    ["email", "is_not", "support@shotgunsoftware.com"],
+                    ["email", "not_in", ["support@shotgunsoftware.com", "changeme@email.com"]],
+                    ["login", "is_not", "shotgun_template_user"],
                 ],
                 [
                     "email",
@@ -240,7 +245,8 @@ class Report(object):
                 "EventLogEntry",
                 [
                     ["event_type", "is", "Shotgun_User_Login"],
-                    ["user.HumanUser.email", "is_not", "support@shotgunsoftware.com"],
+                    ["user.HumanUser.email", "not_in", ["support@shotgunsoftware.com", "changeme@email.com"]],
+                    ["user.HumanUser.login", "is_not", "shotgun_template_user"],
                     self._date_filter,
                 ],
                 [
@@ -292,14 +298,27 @@ class Report(object):
         multi_site = self._sites["multi_site"]
 
         logging.info("\nSHOTGUN USAGE REPORT:\n")
-        logging.info("Number of active users: %s" % multi_site["num_active_users"])
-        logging.info("Number of logged-in users: %s" % multi_site["num_logged_in_users"])
-        logging.info("Date range: %s\n" % multi_site["date_range"])
+
+        logging.info("Number of unique user accounts that logged in between %s: %s\n" % (
+            multi_site["date_range"],
+            multi_site["num_logged_in_users"]),
+        )
+
+        logging.info(
+            "Total number of user accounts with Status currently \"Active\": %s\n" %
+            multi_site["num_active_users"],
+        )
+
         logging.info("Shotgun Sites:\n%s\n" % "\n".join(multi_site["sites"]))
 
         if self._in_house:
-            logging.info("Active users: %s\n" % ", ".join(multi_site["active_users"]))
-            logging.info("Logged-in users: %s\n" % ", ".join(multi_site["logged_in_users"]))
+            logging.info(
+                "Unique user accounts that logged in between %s:\n%s\n" % (
+                    multi_site["date_range"],
+                    "\n".join(multi_site["logged_in_users"])
+                )
+            )
+            logging.info("User accounts with Status currently \"Active\":\n%s\n" % "\n".join(multi_site["active_users"]))
 
 
 if __name__ == "__main__":

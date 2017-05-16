@@ -62,10 +62,24 @@ https://example2.shotgunstudio.com
 ```
 
 This report can be copy/pasted and sent to Shotgun Support. Additionally, a
-`report.json` file will be created in *this* directory. The file can also be
-emailed to Shotgun Support, but note that the `report.json` file contains
-detailed information about Shotgun HumanUsers, so—for security reasons—it may be
-preferable to only send the shell output.
+`report.json` file will be created in *this* directory (the same directory that
+this `README.md` file lives in). The file can also be emailed to Shotgun
+Support, but note that the `report.json` file contains detailed information
+about Shotgun HumanUsers, so—for security reasons—it may be preferable to only
+email the shell output. Here are the HumanUser Shotgun fields stored in the
+`report.json` file:
+
+```
+department
+email
+firstname
+groups
+lastname
+login
+name
+permission_rule_set
+projects
+```
 
 By default the script will parse EventLogEntries for the last 30 days. You can
 optionally specify a date range with the `start_date` and `end_date` arguments,
