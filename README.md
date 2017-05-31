@@ -11,7 +11,7 @@ can be installed by running `pip install -r requirements.txt`. We recommend you
 do this from a virtualenv environment, in order to keep your local system
 environment clean:
 
-https://virtualenv.pypa.io/en/stable/
+https://virtualenv.pypa.io/en/stable
 
 ## Settings
 
