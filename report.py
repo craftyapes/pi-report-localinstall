@@ -27,6 +27,12 @@ time frame, given one or more Shotgun Sites (defined in a settings.yml file). \
 If no --start_date or --end_date arguments are specified, 30 days is used. See \
 README.md for more details."
 
+_IN_HOUSE_WARNING = "WARNING: \n\
+This report contains personally identifiable data about the users of your \n\
+local Shotgun server. We recommend only storing or transferring this report \n\
+in a highly secure way. Please do not send this report to anyone from \n\
+Shotgun or Autodesk.\n"
+
 
 class Report(object):
     """
@@ -298,6 +304,9 @@ class Report(object):
         multi_site = self._sites["multi_site"]
 
         logging.info("\nSHOTGUN USAGE REPORT:\n")
+
+        if self._in_house:
+            logging.info(_IN_HOUSE_WARNING)
 
         logging.info("Number of unique user accounts that logged in between %s: %s\n" % (
             multi_site["date_range"],
