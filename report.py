@@ -151,9 +151,12 @@ class Report(object):
                 credentials.pop("script_key", None)
 
             # Generate, export, and print the report.
-            self._generate()
-            self._export()
-            self._display()
+            try:
+                self._generate()
+                self._export()
+                self._display()
+            except Exception, e:
+                logging.error("FAIL!: %s" % str(e))
 
         # Print the report if it has already been generated.
         if display and not generate:
