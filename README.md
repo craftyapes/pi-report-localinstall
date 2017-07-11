@@ -27,7 +27,7 @@ navigate into the folder that was created when you unzipped the
 `pi-report-localinstall` package, and check the `requirements.txt` file for a
 list of required Python modules. These can be installed by running this command:
 
-`pip install -r requirements.txt`.
+`pip install -r requirements.txt`
 
 We recommend you do this from a `virtualenv` environment, in order to keep your
 local system environment clean. Full `virtualenv` usage instructions can be
@@ -38,10 +38,12 @@ https://virtualenv.pypa.io/en/stable
 ## Authenticate
 
 To gain access to a Shotgun Site, `pi-report-localinstall` needs to reference a
-Script Key. Visit the following url to learn how to create Script (Application)
-Keys for your Shotgun Site:
+Script Key. Visit the following url to learn how to create a Script
+(Application) Key for your Shotgun Site:
 
 https://support.shotgunsoftware.com/hc/en-us/articles/219031368-Create-and-manage-API-Scripts
+
+Name the Script Key something like `pi-report-localinstall`.
 
 ## Settings
 
@@ -50,7 +52,7 @@ at least one Shotgun Site and its associated Script Key defined, like this:
 
 ```
 https://example.shotgunstudio.com:
-    script_name: example_script_name
+    script_name: pi-report-localinstall
     script_key: 123thisisafakescriptkeyexample123
 ```
 
@@ -58,10 +60,10 @@ Multiple Sites can be defined:
 
 ```
 https://example1.shotgunstudio.com:
-    script_name: example_script_name1
+    script_name: pi-report-localinstall
     script_key: 123thisisafakescriptkeyexample456
 https://example2.shotgunstudio.com:
-    script_name: example_script_name2
+    script_name: pi-report-localinstall
     script_key: 789thisisafakescriptkeyexample101
 ```
 
